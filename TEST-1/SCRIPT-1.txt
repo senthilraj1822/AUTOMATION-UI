@@ -1,0 +1,107 @@
+package UI;
+
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.safari.SafariDriver;
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+public class ResolutionTest {
+    
+    public static void main(String[] args) throws IOException {
+        
+        List<String> urls = List.of("https://www.getcalley.com/calley-pro-features/");
+
+        
+        String[] desktopResolutions = { "1920x1080", "1366x768", "1536x864" };
+        String[] mobileResolutions = { "360x640", "414x896", "375x667" };
+
+        
+        String[] browsers = { "chrome", "firefox", "safari" };
+
+        
+        for (String browser : browsers) {
+            WebDriver driver = setupBrowser(browser);
+            
+            if (driver != null) {
+                for (String resolution : desktopResolutions) {
+                    Dimension dimension = parseResolution(resolution);
+                    driver.manage().window().setSize(dimension);
+
+                    for (String url : urls) {
+                        driver.get(url);
+                        takeScreenshot(driver, browser, "Desktop", resolution);
+                    }
+                }
+
+                for (String resolution : mobileResolutions) {
+                    Dimension dimension = parseResolution(resolution);
+                    driver.manage().window().setSize(dimension);
+
+                    for (String url : urls) {
+                        driver.get(url);
+                        takeScreenshot(driver, browser, "Mobile", resolution);
+                    }
+                }
+
+                driver.quit();
+            }
+        }
+    }
+
+    
+    public static WebDriver setupBrowser(String browserName) {
+        WebDriver driver = null;
+        switch (browserName.toLowerCase()) {
+            case "chrome":
+                WebDriverManager.chromedriver().setup();
+                driver = new ChromeDriver();
+                break;
+            case "firefox":
+                WebDriverManager.firefoxdriver().setup();
+                driver = new FirefoxDriver();
+                break;
+            
+            default:
+                System.out.println("Unsupported browser: " + browserName);
+        }
+        return driver;
+    }
+
+    
+    public static Dimension parseResolution(String resolution) {
+        String[] parts = resolution.split("x");
+        return new Dimension(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+    }
+
+    
+    public static void takeScreenshot(WebDriver driver, String browser, String device, String resolution) throws IOException {
+        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        
+        
+        String baseDir = System.getProperty("user.home") + "/Desktop/SeleniumScreenshots";  
+        String folderPath = baseDir + "/" + browser + "/" + device + "/" + resolution;
+        
+        
+        Files.createDirectories(Paths.get(folderPath));
+        
+      
+        String filePath = folderPath + "/screenshot_" + timestamp + ".png";
+        Files.copy(screenshot.toPath(), Paths.get(filePath));
+        
+        System.out.println("Screenshot saved: " + filePath);
+    }
+
+}
