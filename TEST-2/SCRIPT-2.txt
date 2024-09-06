@@ -1,0 +1,87 @@
+package UI;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class FunctionalFlowTest {
+
+	public static void main(String[] args) throws InterruptedException, IOException {
+
+		WebDriverManager.chromedriver().setup();
+		WebDriver driver = new ChromeDriver();
+
+		try {
+
+			driver.get("https://demo.dealsdray.com/");
+			driver.manage().window().maximize();
+
+			WebElement usernameField = driver.findElement(By.id("mui-1")); 
+			WebElement passwordField = driver.findElement(By.id("mui-2")); 
+			WebElement loginButton = driver.findElement(By.className("MuiButton-containedPrimary")); 
+																										
+																								
+
+			usernameField.sendKeys("prexo.mis@dealsdray.com");
+			passwordField.sendKeys("prexo.mis@dealsdray.com");
+			loginButton.click();
+
+			Thread.sleep(3000);
+
+			WebElement orderMenu = driver.findElement(By.className("MuiButtonBase-root"));
+			orderMenu.click();
+			Thread.sleep(2000);
+
+			WebElement ordersSpan = driver.findElement(By.className("sidenavHoverShow"));
+			ordersSpan.click();
+
+			Thread.sleep(2000);
+
+			WebElement ordersButton = driver.findElement(By.xpath("//button[.//span[text()='Orders']]"));
+			ordersButton.click();
+
+		
+			Thread.sleep(2000); 
+
+			
+			WebElement chooseFileButton = driver.findElement(By.id("mui-7")); /
+			File file = new File("F:/browserdriver/Demo-data.xlsx"); 
+			chooseFileButton.sendKeys(file.getAbsolutePath());
+
+			
+			WebElement importButton = driver.findElement(By.id("import-button")); 
+			importButton.click();
+
+			
+			Thread.sleep(5000); 
+
+			
+			WebElement validateDataButton = driver.findElement(By.id("validate-data-button")); 
+			validateDataButton.click();
+
+			
+			takeScreenshot(driver, "final_output");
+
+		} finally {
+			
+			driver.quit();
+		}
+	}
+
+	
+	public static void takeScreenshot(WebDriver driver, String fileName) throws IOException {
+		File screenshot = ((org.openqa.selenium.TakesScreenshot) driver)
+				.getScreenshotAs(org.openqa.selenium.OutputType.FILE);
+		String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+		File destFile = new File(System.getProperty("user.home") + "/Pictures/" + fileName + "_" + timestamp + ".png");
+		org.openqa.selenium.io.FileHandler.copy(screenshot, destFile);
+		System.out.println("Screenshot saved: " + destFile.getAbsolutePath());
+	}
+}
